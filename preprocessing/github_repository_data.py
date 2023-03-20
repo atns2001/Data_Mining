@@ -26,11 +26,42 @@ def data_summary(file_path):
     col_null = data.isnull().sum(axis=0)    #缺失值个数
     print(col_null)
 
+#绘制柱状图
+def draw_bar(name, data, before):
+    data = data.values
+    list = Counter(data).most_common()
+    x_list = []
+    y_list = []
+    s = len(list)
+    if len(list) > 15:
+        s = 15
+    for i in range(s):
+        x_list.append(list[i][0])
+        y_list.append(list[i][1])
+    p2 = plt.bar(x=range(len(x_list)), height=y_list, tick_label=x_list)
+    if before == -1:
+        plt.title('没有操作前的' + name)
+    elif before == 0:
+        plt.title(name)
+    else:
+        plt.title('处理缺失值之后的' + name)        
+    plt.xlabel(name)
+    plt.ylabel('频数')
+    plt.xticks(rotation=90, fontsize=10)
+    plt.bar_label(p2)
+    plt.show()
+
 #数据可视化
 def data_visual(file_path):
     data = pd.read_csv(file_path, engine='python', encoding='utf-8' ,header=0, index_col=False)
 
-    #获取数据库中数字类型数据,非数字类型数据无法绘制直方图盒盒图
+    draw_bar('name', data['name'], 0)
+    draw_bar('primary_language', data['primary_language'], 0)
+    draw_bar('languages_used', data['languages_used'], 0)
+    draw_bar('created_at', data['created_at'], 0)
+    draw_bar('licence', data['licence'], 0)
+
+    #获取数据库中数字类型数据,非数字类型数据无法绘制直方图和盒图
     data_int = data.drop(data.select_dtypes(include='object'), axis=1)
 
     #绘制直方图
@@ -49,38 +80,14 @@ def data_visual(file_path):
         plt.grid(linestyle="--")
         plt.show()
 
-#绘制柱状图
-def draw_bar(name, data, before):
-    data = data.values
-    list = Counter(data).most_common()
-    x_list = []
-    y_list = []
-    for i in range(20):
-        x_list.append(list[i][0])
-        y_list.append(list[i][1])
-    p2 = plt.bar(x=range(len(x_list)), height=y_list, tick_label=x_list)
-    if before == -1:
-        plt.title('没有操作前的' + name)
-    else:
-        plt.title('处理缺失值之后的' + name)
-    plt.xlabel(name)
-    plt.ylabel('频数')
-    plt.bar_label(p2)
-    plt.show()
-
 #将缺失部分剔除
 def filldata_drop(file_path):
     data = pd.read_csv(file_path, engine='python', encoding='utf-8' ,header=0, index_col=False)
 
     #绘制删去缺失值之前的柱状图
-    draw_bar('name', data['name'], -1)
-    draw_bar('stars_count', data['stars_count'], -1)
-    draw_bar('forks_count', data['forks_count'], -1)
-    draw_bar('watchers', data['watchers'], -1)
     draw_bar('primary_language', data['primary_language'], -1)
     draw_bar('languages_used', data['languages_used'], -1)
     draw_bar('commit_count', data['commit_count'], -1)
-    draw_bar('created_at', data['created_at'], -1)
     draw_bar('licence', data['licence'], -1)
 
     print('删去缺失值之前总数据量：'+ str(data.shape[0]))
@@ -88,14 +95,9 @@ def filldata_drop(file_path):
     print('删去缺失值之后总数据量：'+ str(data_drop.shape[0]))
 
     #绘制删去缺失值之后的柱状图
-    draw_bar('name', data_drop['name'], 1)
-    draw_bar('stars_count', data_drop['stars_count'], 1)
-    draw_bar('forks_count', data_drop['forks_count'], 1)
-    draw_bar('watchers', data_drop['watchers'], 1)
     draw_bar('primary_language', data_drop['primary_language'], 1)
     draw_bar('languages_used', data_drop['languages_used'], 1)
     draw_bar('commit_count', data_drop['commit_count'], 1)
-    draw_bar('created_at', data_drop['created_at'], 1)
     draw_bar('licence', data_drop['licence'], 1)
 
 #用最高频率值来填补缺失值
@@ -105,7 +107,6 @@ def filldata_fre(file_path):
     print(data.describe())  #五数概况
 
     #绘制修改缺失值之前的柱状图
-    draw_bar('name', data['name'], -1)
     draw_bar('primary_language', data['primary_language'], -1)
     draw_bar('languages_used', data['languages_used'], -1)
     draw_bar('commit_count', data['commit_count'], -1)
@@ -117,7 +118,6 @@ def filldata_fre(file_path):
     print(data.describe())  #五数概况
 
     #绘制修改缺失值之后的柱状图
-    draw_bar('name', data['name'], 1)
     draw_bar('primary_language', data['primary_language'], 1)
     draw_bar('languages_used', data['languages_used'], 1)
     draw_bar('commit_count', data['commit_count'], 1)
@@ -134,7 +134,7 @@ def filldata_corr(file_path):
     data_lan_used = data['languages_used'].copy()
     data_pri_lan = data['primary_language'].copy()
 
-    #比较languages_used的第一个语言和primary_language的相似性
+    # #比较languages_used的第一个语言和primary_language的相似性
     # i = 0
     # j = 0
     # for m in range(data_lan_used.shape[0]):
@@ -199,9 +199,9 @@ def filldata_simi(file_path):
 
 file_path = '../data/GitHub_Dataset/repository_data.csv'
 
-data_summary(file_path)      #数据摘要
-data_visual(file_path)       #数据可视化
-filldata_drop(file_path)     #将缺失部分剔除
-filldata_fre(file_path)      #用最高频率值来填补缺失值
-filldata_corr(file_path)     #通过属性的相关关系来填补缺失值
+#data_summary(file_path)      #数据摘要
+#data_visual(file_path)       #数据可视化
+#filldata_drop(file_path)     #将缺失部分剔除
+#filldata_fre(file_path)      #用最高频率值来填补缺失值
+#filldata_corr(file_path)     #通过属性的相关关系来填补缺失值
 filldata_simi(file_path)     #通过数据对象之间的相似性来填补缺失值
